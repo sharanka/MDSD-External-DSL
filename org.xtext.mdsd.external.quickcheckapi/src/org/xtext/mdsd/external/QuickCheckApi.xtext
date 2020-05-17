@@ -97,19 +97,19 @@ Json:
 	
 ;
 
-JsonList returns Json:
+JsonList:
 	{JsonList} "[" jsonValues+=JsonValue ("," jsonValues+=JsonValue)* "]"
 ;
 
-JsonObject returns Json:
+JsonObject:
 	{JsonObject} "{" jsonPairs+=JsonPair ("," jsonPairs+=JsonPair)* "}"
 ;
 
-JsonPair  returns Json:
+JsonPair:
 	{JsonPair} key=STRING ":" value=JsonValue
 ;
 
-JsonValue returns Json:
+JsonValue:
 	{StringValue} value=STRING | {IntValue} value=INT | {NestedJsonValue} value=JsonObject | {ListJsonValue} value=JsonList
 ;
 

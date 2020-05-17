@@ -3,6 +3,15 @@
  */
 package org.xtext.mdsd.external.validation
 
+import org.xtext.mdsd.external.quickCheckApi.Request
+import org.xtext.mdsd.external.quickCheckApi.JsonObject
+import org.xtext.mdsd.external.quickCheckApi.JsonPair
+import org.xtext.mdsd.external.services.QuickCheckApiGrammarAccess.JsonValueElements
+import org.xtext.mdsd.external.quickCheckApi.StringValue
+import org.xtext.mdsd.external.quickCheckApi.IntValue
+import org.xtext.mdsd.external.quickCheckApi.QuickCheckApiPackage.Literals
+import org.xtext.mdsd.external.quickCheckApi.QuickCheckApiPackage
+import org.eclipse.xtext.validation.Check
 
 /**
  * This class contains custom validation rules. 
@@ -21,5 +30,46 @@ class QuickCheckApiValidator extends AbstractQuickCheckApiValidator {
 //					INVALID_NAME)
 //		}
 //	}
+
+	@Check
+	def checkBodyMatchesModel(Request request) {
+		var scheme = request.body.scheme;
+		var value = request.body.value; 
+
+
+		var lookup = newHashMap();
+		
+
+
+		if(value instanceof JsonObject) {
+			var o = value as JsonObject;
+			
+			for(pair : o.jsonPairs) {
+				var p = pair as JsonPair;
+				
+				lookup.put(p.key, p);
+			}
+		}
+		
+		
+
+		for(prop : scheme.properties) {			
+			var pair = lookup.remove(prop.key);
+			
+			if(pair == null) {
+				error("Unknown key", pair, Literals.JSON_PAIR__KEY)
+			} else {
+				switch (pair.value) {
+					StringValue case prop.value != "String": {
+						error("Invalid type, expected '" + prop.value + "', got 'String'", pair, Literals.JSON_PAIR__VALUE)
+					}
+					IntValue case prop.value != "Int": {
+						error("Invalid type, expected '" + prop.value + "', got 'Int'", pair, Literals.JSON_PAIR__VALUE);
+					}
+				}
+			}
+		}
+		
+	}
 	
 }
