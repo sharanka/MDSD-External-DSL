@@ -3,7 +3,19 @@ grammar org.xtext.mdsd.external.QuickCheckApi with org.eclipse.xtext.common.Term
 generate quickCheckApi "http://www.xtext.org/mdsd/external/QuickCheckApi"
 
 Builder: 
-	"TestBuilder" tests+=Test+;
+	"TestBuilder" models+=Model* tests+=Test+;
+	
+Model:
+	"Model" name=ID properties+=(ModelProperty)+
+;
+
+JsonDataType:
+	"String" |	"Int"
+;
+
+ModelProperty: 
+	key=ID ":" value=JsonDataType //value=STRING //| "Int" value=STRING 
+;
 
 Test:
 	"Test" name=ID requests+=(Request)+
@@ -77,7 +89,7 @@ Key:
 ;
 
 Body:
-	"body" value=Json
+	"body" scheme=[Model]? value=Json
 ;
 
 Json:
@@ -100,8 +112,6 @@ JsonPair  returns Json:
 JsonValue returns Json:
 	{StringValue} value=STRING | {IntValue} value=INT | {NestedJsonValue} value=JsonObject | {ListJsonValue} value=JsonList
 ;
-
-
 
 PreLogicExp returns Preproposition:
 	PreConjunction("OR" {PreDisjunction.left=current} right=PreConjunction)*
